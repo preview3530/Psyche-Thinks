@@ -250,10 +250,10 @@ export default function App() {
                     className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-4 px-4 rounded-xl transition-all shadow-lg shadow-purple-900/40 active:scale-98 text-center text-base"
                   >
                     <Smartphone className="w-5 h-5 animate-pulse" />
-                    <span>Pay with GPay, PhonePe, Paytm, etc.</span>
+                    <span>Pay with GPay, PhonePe, Paytm, Mobikwik, etc.</span>
                   </a>
                   <p className="text-[11px] text-slate-500 mt-2.5 leading-normal max-w-sm mx-auto">
-                    Supported apps: GPay, PhonePe, Paytm, Cred, Mobikwik, BHIM, and all other UPI payment handlers.
+                    Supported apps: GPay, PhonePe, Paytm, Cred, Mobikwik Pocket UPI, BHIM, and all other UPI wallet apps.
                   </p>
                 </div>
 
@@ -295,8 +295,8 @@ export default function App() {
                 </div>
 
                 <div className="text-left bg-purple-950/20 border border-purple-500/10 rounded-xl p-3.5 w-full text-[11px] text-slate-400 leading-normal space-y-1">
-                  <p className="font-semibold text-purple-300">💡 Tip for Mobile Webviews:</p>
-                  <p>If your browser blocks automatic redirection, copy the UPI ID above, pay <strong>₹{selectedProduct.price}</strong> inside any payment app, and send the screenshot on WhatsApp.</p>
+                  <p className="font-semibold text-purple-300">💡 Tip for Mobile Webviews & Wallets:</p>
+                  <p>If your browser blocks automatic redirection, copy the UPI ID above, pay <strong>₹{selectedProduct.price}</strong> inside any payment app or wallet (like GPay, PhonePe, Paytm, or Mobikwik Pocket UPI), and send the screenshot on WhatsApp.</p>
                 </div>
               </div>
             </motion.div>

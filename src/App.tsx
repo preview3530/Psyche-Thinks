@@ -56,14 +56,17 @@ const generateUpiLink = (price: number): string => {
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState<typeof PRODUCTS[0] | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isIframe] = useState(() => {
+    try {
+      return window.self !== window.top;
+    } catch (e) {
+      return true;
+    }
+  });
 
   const handleBuyClick = (e: React.MouseEvent<HTMLAnchorElement>, product: typeof PRODUCTS[0]) => {
-    // Detect if client device is mobile
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) {
-      e.preventDefault(); // Stop the broken upi:// link browser action on desktop
-      setSelectedProduct(product); // Display QR code fallback modal instead
-    }
+    e.preventDefault();
+    setSelectedProduct(product);
   };
 
   const copyUpiId = () => {
@@ -83,6 +86,13 @@ export default function App() {
           </h1>
         </div>
       </header>
+
+      {/* Embedded Preview Banner */}
+      {isIframe && (
+        <div className="bg-gradient-to-r from-purple-950 to-indigo-950 border-b border-purple-500/20 py-2.5 px-4 text-center text-xs text-purple-200">
+          <span className="font-semibold text-purple-300">💡 Running in Preview:</span> UPI mobile app launch may be restricted by iframe sandboxing. For the best checkout experience, <a href={window.location.href} target="_blank" rel="noopener noreferrer" className="underline font-bold text-white hover:text-purple-300">open this app in a new tab</a> or use the QR Code option.
+        </div>
+      )}
 
       <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-8 md:py-12 flex flex-col gap-12">
         {/* Products Section */}
@@ -218,49 +228,66 @@ export default function App() {
                   <QrCode className="w-6 h-6 text-purple-400" />
                 </div>
                 
-                <h3 className="text-xl font-bold text-slate-100 mb-1">Pay with UPI</h3>
-                <p className="text-sm text-slate-400 mb-4">{selectedProduct.title}</p>
+                <h3 className="text-xl font-bold text-slate-100 mb-1 font-sans">Complete Your Payment</h3>
+                <p className="text-sm text-slate-400 mb-5">{selectedProduct.title}</p>
                 
-                {/* QR Code Generator API (returns a clean vector QR image) */}
-                <div className="bg-white p-4 rounded-2xl mb-5 shadow-inner">
-                  <img 
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&color=581c87&data=${encodeURIComponent(generateUpiLink(selectedProduct.price))}`}
-                    alt="Scan to pay"
-                    className="w-[180px] h-[180px]"
-                  />
+                {/* 1. Direct Pay Button (Highly prominent for Mobile) */}
+                <div className="w-full mb-6">
+                  <a 
+                    href={generateUpiLink(selectedProduct.price)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold py-3.5 px-4 rounded-xl transition-all shadow-lg shadow-purple-900/30 active:scale-95"
+                  >
+                    <Smartphone className="w-5 h-5" />
+                    <span>Pay via UPI App</span>
+                  </a>
+                  <span className="text-[10px] text-slate-500 block mt-1.5 leading-normal">
+                    Launches Google Pay, PhonePe, Paytm, etc. on your mobile device.
+                  </span>
+                </div>
+
+                <div className="relative flex py-2 items-center w-full mb-5">
+                  <div className="flex-grow border-t border-slate-800"></div>
+                  <span className="flex-shrink mx-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">or</span>
+                  <div className="flex-grow border-t border-slate-800"></div>
+                </div>
+
+                {/* 2. QR Code (For Desktop / Tablet) */}
+                <div className="flex flex-col items-center mb-5">
+                  <span className="text-xs text-slate-400 font-semibold mb-2.5">Scan with any UPI App to Pay</span>
+                  <div className="bg-white p-3 rounded-2xl shadow-inner border border-slate-200">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&color=581c87&data=${encodeURIComponent(generateUpiLink(selectedProduct.price))}`}
+                      alt="Scan to pay"
+                      className="w-[150px] h-[150px]"
+                    />
+                  </div>
                 </div>
 
                 <div className="text-center mb-5">
-                  <span className="text-xs text-slate-500 uppercase tracking-wider font-semibold block mb-1">Amount to pay</span>
-                  <span className="text-3xl font-extrabold text-slate-100">₹{selectedProduct.price}</span>
+                  <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold block mb-0.5">Amount to pay</span>
+                  <span className="text-2xl font-extrabold text-slate-100">₹{selectedProduct.price}</span>
                 </div>
 
-                {/* Copy UPI Address Helper */}
-                <div className="w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800 flex items-center justify-between gap-2 mb-6">
+                {/* 3. Copy UPI Address Helper */}
+                <div className="w-full bg-slate-950/60 rounded-xl p-3 border border-slate-800 flex items-center justify-between gap-2 mb-4">
                   <div className="text-left">
-                    <span className="text-[10px] text-slate-500 font-semibold block uppercase">UPI Address</span>
-                    <span className="text-sm text-slate-300 font-mono">8013025757@upi</span>
+                    <span className="text-[9px] text-slate-500 font-bold block uppercase">UPI ID</span>
+                    <span className="text-xs text-slate-300 font-mono select-all">8013025757@upi</span>
                   </div>
                   <button 
                     onClick={copyUpiId}
-                    className="flex items-center gap-1.5 text-xs font-semibold bg-purple-600 hover:bg-purple-500 text-white px-3 py-2 rounded-lg transition-colors"
+                    className="flex items-center gap-1 text-xs font-semibold bg-slate-800 hover:bg-slate-700 hover:text-white text-slate-200 px-2.5 py-1.5 rounded-lg border border-slate-700 transition-colors"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                    {copied ? 'Copied' : 'Copy'}
+                    {copied ? <Check className="w-3 h-3 text-green-400" /> : <Copy className="w-3 h-3" />}
+                    {copied ? 'Copied' : 'Copy ID'}
                   </button>
                 </div>
 
-                <div className="flex flex-col gap-2.5 w-full">
-                  <a 
-                    href={generateUpiLink(selectedProduct.price)}
-                    className="flex items-center justify-center gap-2 text-sm text-slate-400 hover:text-slate-100 transition-colors py-2 border border-dashed border-slate-800 rounded-xl hover:border-slate-700 bg-slate-950/30"
-                  >
-                    <span>Force open custom UPI protocol</span>
-                    <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                  <p className="text-[11px] text-slate-500 leading-normal">
-                    Scan the QR code above with Google Pay, PhonePe, Paytm or any UPI application on your mobile device to complete payment.
-                  </p>
+                <div className="text-left bg-purple-950/20 border border-purple-500/10 rounded-xl p-3.5 w-full text-[11px] text-slate-400 leading-normal space-y-1">
+                  <p className="font-semibold text-purple-300">💡 Tip for Mobile Webviews:</p>
+                  <p>If your browser/app prevents launching your UPI app automatically, copy the UPI ID above, paste it inside your preferred payment app (GPay/Paytm/PhonePe), pay <strong>₹{selectedProduct.price}</strong>, and send the payment screenshot on WhatsApp.</p>
                 </div>
               </div>
             </motion.div>
